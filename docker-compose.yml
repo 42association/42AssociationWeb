@@ -1,0 +1,72 @@
+services:
+  api:
+    image: golang:1.22.1-alpine3.19
+    container_name: api
+    tty: true
+    volumes:
+      - ./42ActivityAPI/api/src:/code
+    working_dir: /code
+    ports:
+      - '8000:8000'
+    networks:
+      - docker-network
+    environment:
+      DSN: ${DSN}
+      UID: ${UID}
+      CALLBACK_URL: ${CALLBACK_URL}
+      SECRET: ${SECRET}
+    depends_on:
+      mariadb:
+        condition: service_healthy
+    command: go run .
+  mariadb:
+    image: mariadb:11.4.1-rc-jammy
+    container_name: mariadb
+    ports:
+      - "3306:${MARIA_PORT}"
+    networks:
+      - docker-network
+    environment:
+      MARIADB_ROOT_PASSWORD: ${MARIA_ROOT_PASS}
+      MARIADB_DATABASE: ${MARIA_NAME}
+      MARIADB_USER: ${MARIA_USER}
+      MARIADB_PASSWORD: ${MARIA_PASS}
+      TZ: 'Asia/Tokyo'
+    healthcheck:
+      test: mariadb-check --databases $MARIA_NAME -u $MARIA_USER -p$MARIA_PASS
+      interval: 5s
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - 8080:8080
+    networks:
+      - docker-network
+    depends_on:
+      mariadb:
+        condition: service_healthy
+  web:
+    image: node:21-alpine3.18
+    container_name: web
+    restart: always
+    tty: true
+    volumes:
+      - ./42AssociationWebServer:/code
+    working_dir: /code
+    ports:
+      - 4242:4242
+    command: npm start
+    networks:
+      - docker-network
+    environment:
+      UID: ${UID}
+      CALLBACK_URL: ${CALLBACK_URL}
+      SECRET: ${SECRET}
+      PORT: ${PORT}
+      SUBARU: ${SUBARU}
+      DBSERVER: ${DBSERVER}
+    depends_on:
+      - api
+networks:
+  docker-network:
+    driver: bridge
