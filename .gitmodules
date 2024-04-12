@@ -1,0 +1,3 @@
+[submodule "42ActivityAPI"]
+	path = 42ActivityAPI
+	url = https://github.com/42association/42ActivityAPI.git
