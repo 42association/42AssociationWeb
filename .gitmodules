@@ -1,3 +1,6 @@
 [submodule "42ActivityAPI"]
 	path = 42ActivityAPI
 	url = https://github.com/42association/42ActivityAPI.git
+[submodule "42AssociationWebServer"]
+	path = 42AssociationWebServer
+	url = https://github.com/42association/frontend_with_server.git
